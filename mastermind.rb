@@ -1,25 +1,49 @@
 class Mastermind
-	attr_accessor :code
+	public
 
-  COLORS = ["R", "O", "Y", "G", "B", "P"]
-  def initialize
+	attr_accessor :code
+	COLORS = ["R", "O", "Y", "G", "B", "P"]
+	
+	def initialize
     @code = generate_code
 		@guess = Array.new(4)
-    puts heading
+		@guesses = Array.new
+		@feedbacks = Array.new
+    print_heading
   end
 
 	def game
 		12.times do |i|
-			puts "Guess four colors (#{i + 1}/12):"
-			puts "Valid colors are #{COLORS.join(", ")}"
+			puts "Guess four colors (Attempt #{i + 1}/12):"
+			puts "Valid colors are [#{COLORS.join(", ")}]"
 			4.times { |number| make_guess(number) }
 			break if @guess == @code
 			puts ""
 			puts "You guessed wrong!"
+			puts ""
 			break if i == 11
-			give_feedback
+			@guesses.push(@guess.clone)
+			generate_feedback
+			print_feedback
 		end
-    @guess == @code ? (puts "\nYou guessed right!\nGAME OVER. You Win!") : (puts "GAME OVER. You Lose...")
+		
+		if @guess == @code
+			puts "\nYou guessed right!"
+			puts "The answer: [#{@code.join(", ")}]"
+
+			puts "GAME OVER. You Win!"
+		else
+			puts "The answer: [#{@code.join(", ")}]"
+			puts "GAME OVER. You Lose..."
+		end
+  end
+
+	private
+
+  def generate_code
+    code = Array.new
+    4.times { code.push(COLORS.sample) }
+    return code
   end
 
 	def make_guess(number)
@@ -35,7 +59,7 @@ class Mastermind
 		@guess[number] = color
 	end
 	
-	def give_feedback
+	def generate_feedback
 		feedback = Array.new
 		temp_code = @code.clone
 		temp_guess = @guess.clone
@@ -59,29 +83,38 @@ class Mastermind
 			end
 		end
 
-		puts "You guessed: #{@guess}"
-		puts "Computer feedback: #{feedback}"
+		@feedbacks.push(feedback)
+	end
+
+	def print_feedback
+		puts "            |    Guess     |   Feedback"
+		puts "____________|______________|_______________"
+		@guesses.each_with_index do |element, index|
+			if index < 9
+				puts "Attempt ##{index + 1}  | [#{element.join(", ")}] | [#{@feedbacks[index].join(", ")}]"
+			else
+				puts "Attempt ##{index + 1} | [#{element.join(", ")}] | [#{@feedbacks[index].join(", ")}]"
+			end
+		end
 		puts ""
 	end
 
-  def generate_code
-    code = Array.new
-    4.times { code.push(COLORS.sample) }
-    return code
-  end
-
-  #finish rules
-  def heading
+  def print_heading
     puts "=== MASTERMIND ==="
     puts ""
-    puts "Rules:"
-    puts "1. "
+    puts "How The Game Works:"
+		puts "1. The codemaker chooses a pattern of four colors in a specific order."
+		puts "2. The codebreaker has twelve chances to guess the codemaker's pattern, in both color and order."
+		puts "3. Every time the codebreaker gets a guess wrong, the codemaker provides feedback on how good the guess was."
+		puts "	a. The codebreaker provides a 'C' marker for each instance where the guess contains a correct color in the correct place."
+		puts "	b. The codebreaker provides a 'W' marker for each instance where the guess contains a correct color in the wrong place."
+		puts "4. If the codebreaker guesses right within twelve chances, the codebreaker wins. If not, the codemaker wins."
     puts ""
-    puts "Computer has generated a code."
-    puts ""
+		puts "Computer has generated a code."
+		puts ""
   end
 end
 
 mastermind = Mastermind.new
-p mastermind.code
+# p mastermind.code
 mastermind.game
